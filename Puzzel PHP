@@ -1,0 +1,72 @@
+<?php
+class FiveByFiveArray {
+    private $array;
+
+    public function __construct() {
+        $this->array = array_fill(0, 5, array_fill(0, 5, ''));
+    }
+
+    public function addValue($row, $col, $value) {
+        if ($row >= 0 && $row < 5 && $col >= 0 && $col < 5) {
+            $this->array[$row][$col] = $value;
+        }
+    }
+
+    public function deleteValue($row, $col) {
+        if ($row >= 0 && $row < 5 && $col >= 0 && $col < 5) {
+            $this->array[$row][$col] = '';
+        }
+    }
+
+    public function getArray() {
+        return $this->array;
+    }
+}
+
+$input = $argv[1];
+$letters = str_split($input);
+
+$lastValue = "";
+$lastValueRij = 0;
+$lastValueKolom = 0;
+
+$myArray = new FiveByFiveArray();
+$usedPositions = [];
+
+foreach ($letters as $letter) {
+    if ($letter == '?') {
+        // Handle '?' by filling it with a custom route logic from the current position to the lower-right corner
+        while ($lastValueRij < 4 || $lastValueKolom < 4) {
+            if ($lastValueRij < 4) {
+                $customLetter = 'N';
+                $lastValueRij++;
+            } else {
+                $customLetter = 'R';
+                $lastValueKolom++;
+            }
+            $myArray->addValue($lastValueRij, $lastValueKolom, $customLetter);
+            $usedPositions[] = [$lastValueRij, $lastValueKolom];
+            $lastValue = $customLetter;
+        }
+    } else {
+        $newPosition = [$lastValueRij, $lastValueKolom];
+
+        if ($letter == 'R') {
+            $newPosition[1]++;
+        } elseif ($letter == 'L') {
+            $newPosition[1]--;
+        } elseif ($letter == 'O') {
+            $newPosition[0]--;
+        } elseif ($letter == 'N') {
+            $newPosition[0]++;
+        }
+
+        if (!in_array($newPosition, $usedPositions) && $newPosition[0] >= 0 && $newPosition[0] < 5 && $newPosition[1] >= 0 && $newPosition[1] < 5) {
+            $myArray->addValue($newPosition[0], $newPosition[1], $letter);
+            $usedPositions[] = $newPosition;
+            $lastValue = $letter;
+        }
+    }
+}
+
+print_r($myArray->getArray());
